@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -17,6 +17,13 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderProcess.Application\OrderProcess.Application.csproj" />
+    <ProjectReference Include="..\OrderProcess.Core\OrderProcess.Core.csproj" />
+    <ProjectReference Include="..\OrderProcess.Data\OrderProcess.Data.csproj" />
+    <ProjectReference Include="..\OrderProcess.Infrastructure\OrderProcess.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

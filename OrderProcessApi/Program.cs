@@ -1,80 +1,45 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using FluentValidation;
-using OrderProcessApi.OrderProcessing.Behaviors;
-using OrderProcessApi.OrderProcessing.Data;
-using OrderProcessApi.OrderProcessing.Repositories;
-using System.Text;
+using OrderProcess.Data.DataExtentions;
+using OrderProcess.Data.Repositories;
+using OrderProcess.Infrastructure;
+using OrderProcessApi.Configurations;
+using OrderProcessApi.OrderProcessing.Validations;
+using OrderProcess.Application.Services.Commands.CreateOrder;
+using System.Reflection;
+using OrderProcess.Application.Services.Queries.GetOrderById;
+using OrderProcessApi.Configurations.OrderProcessApi.Extensions;
+using OrderProcess.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Order Processing API",
-        Version = "v1",
-        Description = "API for processing customer orders"
-    });
 
-    var securityScheme = new OpenApiSecurityScheme
-    {
-        Name = "JWT Authentication",
-        Description = "Enter JWT Bearer token",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
-    };
-
-    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { securityScheme, Array.Empty<string>() }
-    });
-});
+builder.Services.AddCustomSwagger();
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    cfg.RegisterServicesFromAssembly(typeof(CreateOrderCommandHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(GetOrderByIdQueryHandler).Assembly);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderCommandValidator>();
-
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
-        };
-    });
-
+builder.Services.ConfigureJwt(builder.Configuration);
 builder.Services.AddAuthorization();
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<OrderMapperProfile>();
+}, typeof(OrderMapperProfile).Assembly);
 
 var app = builder.Build();
 
