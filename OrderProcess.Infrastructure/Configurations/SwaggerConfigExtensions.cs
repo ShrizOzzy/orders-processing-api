@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
-namespace OrderProcessApi.Configurations
+namespace OrderProcess.Infrastructure.Configurations
 {
     namespace OrderProcessApi.Extensions
     {

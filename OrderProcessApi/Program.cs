@@ -3,13 +3,13 @@ using FluentValidation;
 using OrderProcess.Data.DataExtentions;
 using OrderProcess.Data.Repositories;
 using OrderProcess.Infrastructure;
-using OrderProcessApi.Configurations;
 using OrderProcessApi.OrderProcessing.Validations;
 using OrderProcess.Application.Services.Commands.CreateOrder;
 using System.Reflection;
 using OrderProcess.Application.Services.Queries.GetOrderById;
-using OrderProcessApi.Configurations.OrderProcessApi.Extensions;
 using OrderProcess.Application.Services;
+using OrderProcess.Infrastructure.Configurations;
+using OrderProcess.Infrastructure.Configurations.OrderProcessApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
